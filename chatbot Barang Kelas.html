@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Asisten Kelas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .chat-container {
+      width: 400px;
+      max-width: 95%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: #0071e3;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+    }
+    .bot {
+      background: #e5e5ea;
+      align-self: flex-start;
+    }
+    .user {
+      background: #0071e3;
+      color: white;
+      align-self: flex-end;
+    }
+    .input-box {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+    .input-box input {
+      flex: 1;
+      border: none;
+      padding: 14px;
+      font-size: 14px;
+      border-radius: 0;
+    }
+    .input-box button {
+      background: #0071e3;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      cursor: pointer;
+    }
+    .input-box button:hover {
+      background: #005bb5;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Asisten Kelas Abm Official Channel</div>
+    <div class="chat-box" id="chatBox">
+      <div class="message bot">Hai! Aku asisten kelasmu. Ada barang yang hilang, ya?</div>
+    </div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Ketik jawabanmu..." autofocus>
+      <button onclick="sendMessage()">Kirim</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+
+    let step = 0;
+    let data = {};
+
+    const questions = [
+      "Nama barangnya apa?",
+      "Warna barang itu apa?",
+      "Ada ciri-ciri khusus? (contoh: stiker, goresan, dll.)",
+      "Terakhir kali kamu lihat di mana?",
+      "Apakah barangnya sudah ketemu? (ya/tidak)",
+      "Apakah kamu ingin mencatat barang yang ditemukan orang lain? (ya/tidak)"
+    ];
+
+    function sendMessage() {
+      let input = userInput.value.trim();
+      if (!input) return;
+
+      addMessage(input, "user");
+      userInput.value = "";
+
+      setTimeout(() => {
+        processInput(input);
+      }, 500);
+    }
+
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.innerText = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function processInput(input) {
+      if (step === 0) {
+        data.nama = input;
+        addMessage(questions[1], "bot");
+        step++;
+      } else if (step === 1) {
+        data.warna = input;
+        addMessage(questions[2], "bot");
+        step++;
+      } else if (step === 2) {
+        data.ciri = input;
+        addMessage(questions[3], "bot");
+        step++;
+      } else if (step === 3) {
+        data.lokasi = input;
+        addMessage("Oke, aku catat detailnya:\n" +
+          `- Nama: ${data.nama}\n- Warna: ${data.warna}\n- Ciri: ${data.ciri}\n- Lokasi terakhir: ${data.lokasi}`, "bot");
+        addMessage("Sekarang, coba kita cari bareng-bareng. Coba cek laci, bawah meja, rak buku, atau tanya temanmu.", "bot");
+        addMessage(questions[4], "bot");
+        step++;
+      } else if (step === 4) {
+        if (input.toLowerCase() === "ya") {
+          addMessage("Hore! Senang dengar barangnya sudah ketemu!", "bot");
+          addMessage(questions[5], "bot");
+          step = 5;
+        } else {
+          addMessage("Oh, belum ketemu ya? Jangan khawatir:\n- Pinjam sementara dari teman/guru\n- Lapor ke guru kelas\n- Tulis di papan pengumuman", "bot");
+          addMessage(questions[5], "bot");
+          step = 5;
+        }
+      } else if (step === 5) {
+        if (input.toLowerCase() === "ya") {
+          addMessage("Nama barang yang ditemukan apa?", "bot");
+          step = 6;
+        } else {
+          addMessage("Baik, semoga barangmu cepat ketemu!", "bot");
+          step = 999;
+        }
+      } else if (step === 6) {
+        data.nama_ditemukan = input;
+        addMessage(`Bagaimana ciri-ciri ${data.nama_ditemukan}?`, "bot");
+        step++;
+      } else if (step === 7) {
+        data.ciri_ditemukan = input;
+        addMessage(`Di mana ${data.nama_ditemukan} ditemukan?`, "bot");
+        step++;
+      } else if (step === 8) {
+        data.lokasi_ditemukan = input;
+        addMessage("Siapa yang menemukan barang ini?", "bot");
+        step++;
+      } else if (step === 9) {
+        data.penemu = input;
+        addMessage("Oke, aku catat detail barang yang ditemukan:\n" +
+          `- Nama: ${data.nama_ditemukan}\n- Ciri: ${data.ciri_ditemukan}\n- Lokasi ditemukan: ${data.lokasi_ditemukan}\n- Penemu: ${data.penemu}`, "bot");
+        addMessage("Terima kasih sudah berbagi informasi! Semoga pemiliknya cepat menemukannya.", "bot");
+        step = 999;
+      }
+    }
+  </script>
+</body>
+</html>
